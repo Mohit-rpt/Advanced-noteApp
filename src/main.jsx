@@ -1,20 +1,10 @@
+import React from "react";
+import ReactDOM from "react-dom/client";
+import App from "./App";
+import "./index.css";
 
-import { createRoot } from 'react-dom/client'
-
-const element = (
-  <table>
-    <tr>
-      <th>Name</th>
-    </tr>
-    <tr>
-      <th>John</th>
-      </tr>
-      <tr>
-        <th>Mohit</th>
-      </tr>
-
-  </table>
-)
-createRoot(document.getElementById('root')).render(
- element
-)
+ReactDOM.createRoot(document.getElementById("root")).render(
+  <React.StrictMode>
+    <App />
+  </React.StrictMode>
+);
