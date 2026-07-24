@@ -1,6 +1,6 @@
 import NoteCard from "./NoteCard";
 
-function NoteList({ notes }) {
+function NoteList({ notes, deleteNote ,editNote}) {
     return (
         <>
             {notes.map((note, index) => (
@@ -8,6 +8,8 @@ function NoteList({ notes }) {
                     key={index}
                     title={note.title}
                     content={note.content}
+                    onDelete={() => deleteNote(index)}
+                    onEdit={() => editNote(index)}
                 />
             ))}
         </>

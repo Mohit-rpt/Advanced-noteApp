@@ -7,9 +7,44 @@ import { useState } from "react";
 
 function App() {
   const [notes,setNotes] = useState([]);
+  const [editIndex,setEditIndex] = useState(null);
+  const [editTitle,setEditTitle] = useState("");
+  const [editContent,setEditContent] = useState("");
+
+
+
   const addNote = (note) => {
     setNotes([...notes, note]);
     console.log(notes);
+  }
+
+  function deleteNote(index){
+    setNotes((prevNotes) =>
+      prevNotes.filter((_,i)=> i !== index))
+  }
+
+  function editNote(index){
+    console.log("Edit clicked", index);
+    setEditIndex(index);
+    setEditTitle(notes[index].title);
+    setEditContent(notes[index].content);
+      console.log(notes[index]);
+  }
+
+  function updateNote(){
+    setNotes((prevNotes) => 
+    prevNotes.map((note,index)=>{
+      if(index ===  editIndex){
+        return {
+          title:editTitle,
+          content:editContent
+        }
+      }
+      return note;
+    }))
+    setEditIndex(null);
+    setEditTitle("");
+    setEditContent("");
   }
   return (
     <>
@@ -19,9 +54,18 @@ function App() {
        />
 
       <main>
-        <NoteForm addNote={addNote} />
+        <NoteForm addNote={addNote}
+                  editTitle={editTitle}
+                  editContent={editContent}
+                  setEditTitle={setEditTitle}
+                  setEditContent={setEditContent}
+                  editIndex={editIndex}
+                  updateNote={updateNote}
+                   />
         <SearchBar />
-        <NoteList notes={notes} />
+        <NoteList notes={notes}
+                  deleteNote={deleteNote}
+                  editNote={editNote} />
       </main>
 
       <Footer />
