@@ -21,7 +21,7 @@ function App() {
       <main>
         <NoteForm addNote={addNote} />
         <SearchBar />
-        <NoteList  />
+        <NoteList notes={notes} />
       </main>
 
       <Footer />

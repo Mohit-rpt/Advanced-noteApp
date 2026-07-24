@@ -1,5 +1,6 @@
-function NoteForm({addNote}) {
+import React, { useState } from "react";
 
+function NoteForm({ addNote }) {
   const [title, setTitle] = useState("");
   const [content, setContent] = useState("");
 
@@ -7,12 +8,11 @@ function NoteForm({addNote}) {
     e.preventDefault();
     addNote({ title, content });
     setTitle("");
-    setContent(""); 
+    setContent("");
   };
 
   return (
     <form onSubmit={handleSubmit}>
-
       <input
         type="text"
         placeholder="Enter title"
@@ -26,10 +26,7 @@ function NoteForm({addNote}) {
         onChange={(e) => setContent(e.target.value)}
       />
 
-      <button type="submit">
-        Add Note
-      </button>
-
+      <button type="submit">Add Note</button>
     </form>
   );
 }
