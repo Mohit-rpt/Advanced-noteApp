@@ -3,14 +3,22 @@ import Footer from "./components/common/Footer";
 import NoteForm from "./components/notes/NoteForm";
 import SearchBar from "./components/notes/SearchBar";
 import NoteList from "./components/notes/NoteList";
-import { useState } from "react";
+import { useState,useEffect } from "react";
 
 function App() {
-  const [notes,setNotes] = useState([]);
+  const [notes, setNotes] = useState(() => {
+  const savedNotes = localStorage.getItem("notes");
+  return savedNotes ? JSON.parse(savedNotes) : [];
+});
   const [editIndex,setEditIndex] = useState(null);
   const [editTitle,setEditTitle] = useState("");
   const [editContent,setEditContent] = useState("");
 
+
+  useEffect(() => {
+    console.log("Saving Notes:", notes);
+    localStorage.setItem("notes", JSON.stringify(notes));
+   }, [notes]);
 
 
   const addNote = (note) => {
