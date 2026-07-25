@@ -6,6 +6,7 @@ import NoteList from "./components/notes/NoteList";
 import Navbar from "./components/notes/Navbar";
 import { useState, useEffect } from "react";
 import "./index.css";
+import DeleteModal from "./components/common/DeleteModal";
 
 function App() {
   const [notes, setNotes] = useState(() => {
@@ -17,6 +18,8 @@ function App() {
   const [editTitle, setEditTitle] = useState("");
   const [editContent, setEditContent] = useState("");
   const[search,setSearch] = useState("");
+  const [showDeleteModal,setShowDeleteModal] = useState(false);
+  const [deleteIndex,setDeleteIndex] = useState(null);
 
   useEffect(() => {
     localStorage.setItem("notes", JSON.stringify(notes));
@@ -27,8 +30,16 @@ function App() {
   };
 
   const deleteNote = (index) => {
-    setNotes((prev) => prev.filter((_, i) => i !== index));
-  };
+   setDeleteIndex(index);
+   setShowDeleteModal(true);
+  }
+  function confirmDelete(){
+    setNotes((prevNotes)=>
+    prevNotes.filter((_,i)=> i !== deleteIndex)
+  )
+  setShowDeleteModal(false);
+  setDeleteIndex(null);
+  }
 
   const editNote = (index) => {
     setEditIndex(index);
@@ -59,7 +70,7 @@ function App() {
     <div className="min-h-screen bg-gray-100">
       <Navbar />
 
-      <div className="max-w-3xl mx-auto py-8 px-4">
+      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
 
         <Header
           title="📝 Advanced Notes"
@@ -89,6 +100,11 @@ function App() {
           />
 
         </main>
+        <DeleteModal 
+          isOpen={showDeleteModal}
+          onCancel={()=> setShowDeleteModal(false)}
+          onConfirm={confirmDelete}
+          />
 
         <Footer />
 
