@@ -7,6 +7,8 @@ import Navbar from "./components/notes/Navbar";
 import { useState, useEffect } from "react";
 import "./index.css";
 import DeleteModal from "./components/common/DeleteModal";
+import Toast from "./components/common/Toast";
+
 
 function App() {
   const [notes, setNotes] = useState(() => {
@@ -17,29 +19,39 @@ function App() {
   const [editIndex, setEditIndex] = useState(null);
   const [editTitle, setEditTitle] = useState("");
   const [editContent, setEditContent] = useState("");
-  const[search,setSearch] = useState("");
-  const [showDeleteModal,setShowDeleteModal] = useState(false);
-  const [deleteIndex,setDeleteIndex] = useState(null);
-  const [darkMode,setDarkMode] = useState(false);
+  const [search, setSearch] = useState("");
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [deleteIndex, setDeleteIndex] = useState(null);
+  const [darkMode, setDarkMode] = useState(false);
+  const [toast, setToast] = useState({ show: false, message: "", type: "success" });
 
+
+    const showToast = (message, type = "success") => {
+    setToast({ show: true, message, type });
+    };
+
+    const hideToast = () => {
+      setToast({ show: false, message: "", type: "success" });
+    };
   useEffect(() => {
     localStorage.setItem("notes", JSON.stringify(notes));
   }, [notes]);
 
   const addNote = (note) => {
-    setNotes([...notes, note]);
+    setNotes([...notes, { ...note, pinned: false, id: Date.now(), date: new Date().toISOString() }]);
+     showToast("Note added successfully!", "success"); 
   };
 
   const deleteNote = (index) => {
-   setDeleteIndex(index);
-   setShowDeleteModal(true);
-  }
-  function confirmDelete(){
-    setNotes((prevNotes)=>
-    prevNotes.filter((_,i)=> i !== deleteIndex)
-  )
-  setShowDeleteModal(false);
-  setDeleteIndex(null);
+    setDeleteIndex(index);
+    setShowDeleteModal(true);
+  };
+
+  function confirmDelete() {
+    setNotes((prevNotes) => prevNotes.filter((_, i) => i !== deleteIndex));
+    setShowDeleteModal(false);
+    setDeleteIndex(null);
+    showToast("Note deleted!", "error");
   }
 
   const editNote = (index) => {
@@ -52,33 +64,42 @@ function App() {
     setNotes((prev) =>
       prev.map((note, index) =>
         index === editIndex
-          ? { title: editTitle, content: editContent }
+          ? { ...note, title: editTitle, content: editContent }
           : note
       )
     );
-
     setEditIndex(null);
     setEditTitle("");
     setEditContent("");
+    showToast("Note updated!", "info");
+  };
+
+  // 👇 PIN TOGGLE FUNCTION
+  const togglePin = (index) => {
+    setNotes((prev) =>
+      prev.map((note, i) =>
+        i === index ? { ...note, pinned: !note.pinned } : note
+      )
+    );
+    showToast(isPinned ? "Note pinned!" : "Note unpinned!", "info");
   };
 
   const filterNotes = notes.filter((note) =>
-  note.title.toLowerCase().includes(search.toLowerCase()) ||
-  note.content.toLowerCase().includes(search.toLowerCase())
-  )
+    note.title.toLowerCase().includes(search.toLowerCase()) ||
+    note.content.toLowerCase().includes(search.toLowerCase())
+  );
+
+  // 👇 SORT: Pinned notes first
+  const sortedNotes = [...filterNotes].sort((a, b) => {
+    if (a.pinned === b.pinned) return 0;
+    return a.pinned ? -1 : 1;
+  });
 
   return (
-   <div
-  className={`min-h-screen transition-colors duration-300 ${
-    darkMode ? "bg-gray-900 text-white" : "bg-gray-100 text-black"
-  }`}
->
-      <Navbar  
-        darkMode={darkMode}
-        setDarkMode={setDarkMode}/>
+    <div className={`min-h-screen transition-colors duration-300 ${darkMode ? "bg-gray-900 text-white" : "bg-gray-100 text-black"}`}>
+      <Navbar darkMode={darkMode} setDarkMode={setDarkMode} />
 
       <div className="max-w-4xl mx-auto px-3 sm:px-4 lg:px-8 py-4 sm:py-6">
-    
         <Header
           title="📝 Advanced Notes"
           subtitle="Organize your ideas beautifully."
@@ -86,11 +107,7 @@ function App() {
         />
 
         <main className="space-y-6">
-
-          <SearchBar 
-          search={search}
-          setSearch={setSearch} />
-
+          <SearchBar search={search} setSearch={setSearch} />
 
           <NoteForm
             addNote={addNote}
@@ -104,24 +121,32 @@ function App() {
             darkMode={darkMode}
           />
 
-         
+          {/* 👇 togglePin prop pass kiya */}
           <NoteList
-            notes={filterNotes}
+            notes={sortedNotes}
             deleteNote={deleteNote}
             editNote={editNote}
+            togglePin={togglePin}
             darkMode={darkMode}
           />
-
         </main>
-        <DeleteModal 
+
+        <DeleteModal
           isOpen={showDeleteModal}
-          onCancel={()=> setShowDeleteModal(false)}
+          onCancel={() => setShowDeleteModal(false)}
           onConfirm={confirmDelete}
-          />
+        />
 
         <Footer />
-
       </div>
+         {toast.show && (
+        <Toast
+          message={toast.message}
+          type={toast.type}
+          onClose={hideToast}
+          darkMode={darkMode}
+        />
+      )}
     </div>
   );
 }
