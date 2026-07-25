@@ -20,6 +20,7 @@ function App() {
   const[search,setSearch] = useState("");
   const [showDeleteModal,setShowDeleteModal] = useState(false);
   const [deleteIndex,setDeleteIndex] = useState(null);
+  const [darkMode,setDarkMode] = useState(false);
 
   useEffect(() => {
     localStorage.setItem("notes", JSON.stringify(notes));
@@ -67,17 +68,29 @@ function App() {
   )
 
   return (
-    <div className="min-h-screen bg-gray-100">
-      <Navbar />
+   <div
+  className={`min-h-screen transition-colors duration-300 ${
+    darkMode ? "bg-gray-900 text-white" : "bg-gray-100 text-black"
+  }`}
+>
+      <Navbar  
+        darkMode={darkMode}
+        setDarkMode={setDarkMode}/>
 
-      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-
+      <div className="max-w-4xl mx-auto px-3 sm:px-4 lg:px-8 py-4 sm:py-6">
+    
         <Header
           title="📝 Advanced Notes"
           subtitle="Organize your ideas beautifully."
+          darkMode={darkMode}
         />
 
         <main className="space-y-6">
+
+          <SearchBar 
+          search={search}
+          setSearch={setSearch} />
+
 
           <NoteForm
             addNote={addNote}
@@ -87,16 +100,16 @@ function App() {
             setEditContent={setEditContent}
             editIndex={editIndex}
             updateNote={updateNote}
+            onCancel={() => setEditIndex(null)}
+            darkMode={darkMode}
           />
 
-          <SearchBar 
-          search={search}
-          setSearch={setSearch} />
-
+         
           <NoteList
             notes={filterNotes}
             deleteNote={deleteNote}
             editNote={editNote}
+            darkMode={darkMode}
           />
 
         </main>

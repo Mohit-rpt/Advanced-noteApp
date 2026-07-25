@@ -1,6 +1,6 @@
 import NoteCard from "./NoteCard";
 
-function NoteList({ notes, deleteNote ,editNote}) {
+function NoteList({ notes, deleteNote ,editNote,darkMode}) {
     if(notes.length === 0){
         return (
             <div className="bg-white rounded-xl shadow-md p-10 text-center mt-6">
@@ -16,7 +16,7 @@ function NoteList({ notes, deleteNote ,editNote}) {
     }
     return (
         <>
-        <div className="grid gap-5 mt-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
             {notes.map((note, index) => (
                 <NoteCard
                     key={index}
@@ -24,6 +24,7 @@ function NoteList({ notes, deleteNote ,editNote}) {
                     content={note.content}
                     onDelete={() => deleteNote(index)}
                     onEdit={() => editNote(index)}
+                    darkMode={darkMode}
                 />
             ))}
         </div>
