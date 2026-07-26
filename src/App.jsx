@@ -4,11 +4,10 @@ import NoteForm from "./components/notes/NoteForm";
 import SearchBar from "./components/notes/SearchBar";
 import NoteList from "./components/notes/NoteList";
 import Navbar from "./components/notes/Navbar";
+import Toast from "./components/common/Toast";
 import { useState, useEffect } from "react";
 import "./index.css";
 import DeleteModal from "./components/common/DeleteModal";
-import Toast from "./components/common/Toast";
-
 
 function App() {
   const [notes, setNotes] = useState(() => {
@@ -25,21 +24,18 @@ function App() {
   const [darkMode, setDarkMode] = useState(false);
   const [toast, setToast] = useState({ show: false, message: "", type: "success" });
 
-
-    const showToast = (message, type = "success") => {
-    setToast({ show: true, message, type });
-    };
-
-    const hideToast = () => {
-      setToast({ show: false, message: "", type: "success" });
-    };
   useEffect(() => {
     localStorage.setItem("notes", JSON.stringify(notes));
   }, [notes]);
 
+  const showToastMsg = (message, type = "success") => {
+    setToast({ show: true, message, type });
+  };
+  const hideToast = () => setToast({ show: false, message: "", type: "success" });
+
   const addNote = (note) => {
     setNotes([...notes, { ...note, pinned: false, id: Date.now(), date: new Date().toISOString() }]);
-     showToast("Note added successfully!", "success"); 
+    showToastMsg("Note added!", "success");
   };
 
   const deleteNote = (index) => {
@@ -48,10 +44,10 @@ function App() {
   };
 
   function confirmDelete() {
-    setNotes((prevNotes) => prevNotes.filter((_, i) => i !== deleteIndex));
+    setNotes((prev) => prev.filter((_, i) => i !== deleteIndex));
     setShowDeleteModal(false);
     setDeleteIndex(null);
-    showToast("Note deleted!", "error");
+    showToastMsg("Note deleted!", "error");
   }
 
   const editNote = (index) => {
@@ -62,26 +58,31 @@ function App() {
 
   const updateNote = () => {
     setNotes((prev) =>
-      prev.map((note, index) =>
-        index === editIndex
-          ? { ...note, title: editTitle, content: editContent }
-          : note
-      )
+      prev.map((note, i) => (i === editIndex ? { ...note, title: editTitle, content: editContent } : note))
     );
     setEditIndex(null);
     setEditTitle("");
     setEditContent("");
-    showToast("Note updated!", "info");
+    showToastMsg("Note updated!", "info");
   };
 
-  // 👇 PIN TOGGLE FUNCTION
   const togglePin = (index) => {
-    setNotes((prev) =>
-      prev.map((note, i) =>
-        i === index ? { ...note, pinned: !note.pinned } : note
-      )
-    );
-    showToast(isPinned ? "Note pinned!" : "Note unpinned!", "info");
+    const willPin = !notes[index].pinned;
+    setNotes((prev) => prev.map((note, i) => (i === index ? { ...note, pinned: willPin } : note)));
+    showToastMsg(willPin ? "Note pinned!" : "Unpinned", "info");
+  };
+
+  // 📤 Export Notes
+  const exportNotes = () => {
+    const data = JSON.stringify(notes, null, 2);
+    const blob = new Blob([data], { type: "application/json" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `notes-backup-${new Date().toISOString().split("T")[0]}.json`;
+    a.click();
+    URL.revokeObjectURL(url);
+    showToastMsg("Notes exported!", "success");
   };
 
   const filterNotes = notes.filter((note) =>
@@ -89,7 +90,6 @@ function App() {
     note.content.toLowerCase().includes(search.toLowerCase())
   );
 
-  // 👇 SORT: Pinned notes first
   const sortedNotes = [...filterNotes].sort((a, b) => {
     if (a.pinned === b.pinned) return 0;
     return a.pinned ? -1 : 1;
@@ -100,14 +100,25 @@ function App() {
       <Navbar darkMode={darkMode} setDarkMode={setDarkMode} />
 
       <div className="max-w-4xl mx-auto px-3 sm:px-4 lg:px-8 py-4 sm:py-6">
-        <Header
-          title="📝 Advanced Notes"
-          subtitle="Organize your ideas beautifully."
-          darkMode={darkMode}
-        />
+        <Header title="📝 Advanced Notes" subtitle="Organize your ideas beautifully." darkMode={darkMode} />
 
         <main className="space-y-6">
-          <SearchBar search={search} setSearch={setSearch} />
+          {/* Search + Export */}
+          <div className="flex flex-col sm:flex-row gap-3">
+            <div className="flex-1">
+              <SearchBar search={search} setSearch={setSearch} darkMode={darkMode} />
+            </div>
+            <button
+              onClick={exportNotes}
+              className={`px-4 py-2.5 rounded-xl text-sm font-medium transition border ${
+                darkMode
+                  ? "bg-gray-800 text-gray-300 border-gray-700 hover:bg-gray-700"
+                  : "bg-white text-gray-700 border-gray-200 hover:bg-gray-50"
+              }`}
+            >
+              📤 Export
+            </button>
+          </div>
 
           <NoteForm
             addNote={addNote}
@@ -121,7 +132,6 @@ function App() {
             darkMode={darkMode}
           />
 
-          {/* 👇 togglePin prop pass kiya */}
           <NoteList
             notes={sortedNotes}
             deleteNote={deleteNote}
@@ -135,17 +145,14 @@ function App() {
           isOpen={showDeleteModal}
           onCancel={() => setShowDeleteModal(false)}
           onConfirm={confirmDelete}
-        />
-
-        <Footer />
-      </div>
-         {toast.show && (
-        <Toast
-          message={toast.message}
-          type={toast.type}
-          onClose={hideToast}
           darkMode={darkMode}
         />
+
+        <Footer darkMode={darkMode} />
+      </div>
+
+      {toast.show && (
+        <Toast message={toast.message} type={toast.type} onClose={hideToast} darkMode={darkMode} />
       )}
     </div>
   );
