@@ -1,6 +1,6 @@
 import Header from "./components/common/Header";
 import Footer from "./components/common/Footer";
-import NoteForm from "./components/notes/NoteForm";
+import NoteForm from "./components/notes/Noteform";
 import SearchBar from "./components/notes/SearchBar";
 import NoteList from "./components/notes/NoteList";
 import Navbar from "./components/notes/Navbar";
